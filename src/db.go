@@ -66,17 +66,6 @@ func initDB() {
 			created_at INTEGER,
 			updated_at INTEGER
 		);
-		CREATE TABLE IF NOT EXISTS templates (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT UNIQUE,
-			sort INTEGER,
-			proxy INTEGER DEFAULT 0,
-			fingerprint TEXT DEFAULT '',
-			args TEXT DEFAULT '',
-			notes TEXT DEFAULT '',
-			created_at INTEGER,
-			updated_at INTEGER
-		);
 		CREATE INDEX IF NOT EXISTS idx_profiles_group_id ON profiles(group_id);
 		CREATE INDEX IF NOT EXISTS idx_profiles_proxy ON profiles(proxy);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_group_name ON profiles(group_id, name);

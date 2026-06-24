@@ -58,35 +58,6 @@ export const importCookies = (data) => {
   return request.post(`/import_cookies`, data)
 }
 
-// Template APIs
-export const getTemplates = (params) => {
-  return request.get(`/get_templates`, { params })
-}
-
-export const getTemplate = (id) => {
-  return request.get(`/get_template`, { params: { id } })
-}
-
-export const addTemplate = (data) => {
-  return request.post(`/add_template`, data)
-}
-
-export const updateTemplate = (data) => {
-  return request.post(`/update_template`, data)
-}
-
-export const deleteTemplate = (id) => {
-  return request.post(`/delete_template`, { id })
-}
-
-export const createFromTemplate = (data) => {
-  return request.post(`/create_from_template`, data)
-}
-
-export const saveAsTemplate = (data) => {
-  return request.post(`/save_as_template`, data)
-}
-
 // Proxy APIs
 export const getProxies = (params) => {
   return request.get(`/get_proxies`, { params })

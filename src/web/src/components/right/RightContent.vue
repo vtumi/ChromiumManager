@@ -2,6 +2,7 @@
   <div class="content">
     <div ref="listRef" class="list">
       <el-table
+        ref="tableRef"
         :data="listView"
         highlight-current-row
         stripe
@@ -60,8 +61,7 @@
                 <el-button size="small" @click.stop>更多</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="saveAsTemplate">存为模板</el-dropdown-item>
-                    <el-dropdown-item command="delete" divided class="delete-item">删除</el-dropdown-item>
+                    <el-dropdown-item command="delete" class="delete-item">删除</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -337,18 +337,6 @@
 
     <ProxyManagement v-model="proxyManageVisible" @change="fetchProxies" @select="onProxySelect" />
 
-    <el-dialog v-model="saveTemplateDialog" title="存为模板" :width="400">
-      <el-form ref="saveTemplateFormRef" :model="saveTemplateForm" :rules="saveTemplateRules" label-width="auto">
-        <el-form-item label="模板名称" prop="templateName">
-          <el-input v-model="saveTemplateForm.templateName" placeholder="请输入模板名称"></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="saveTemplateDialog = false">取消</el-button>
-        <el-button type="primary" @click="onSaveTemplateConfirm">确定</el-button>
-      </template>
-    </el-dialog>
-
     <el-dialog v-model="cookieDialog" title="导入Cookie" :width="600">
       <el-form ref="cookieFormRef" :model="cookieForm" :rules="cookieRules">
         <el-form-item prop="text">
@@ -396,8 +384,7 @@ import {
   stopProfile,
   showProfile,
   exportCookies,
-  importCookies,
-  saveAsTemplate
+  importCookies
 } from '@/api'
 import { validateForm } from '@/utils/common'
 import { languages, timezones, screens, BASE_URL } from '@/utils/constants'
@@ -407,36 +394,38 @@ const activeGroupId = inject('activeGroupId')
 const device = inject('device')
 const proxies = inject('proxies')
 const fetchProxies = inject('fetchProxies')
-const updateDeviceInfo = inject('updateDeviceInfo')
 
 const listRef = ref(null)
+const tableRef = ref(null)
 const formRef = ref(null)
 const formDialog = ref(false)
 const runningSet = ref(new Set())
 const proxyManageVisible = ref(false)
-const saveTemplateDialog = ref(false)
-const saveTemplateFormRef = ref(null)
-const saveTemplateForm = reactive({ profileId: '', templateName: '' })
-const saveTemplateRules = {
-  templateName: [{ required: true, message: '请输入模板名称', trigger: 'blur' }]
-}
+const selectedRow = ref(null)
 
 const cookieDialog = ref(false)
 const cookieImportRow = ref(null)
 const cookieFormRef = ref(null)
 const cookieForm = reactive({ text: '' })
 const cookieRules = {
-  text: [{
-    required: true, message: '请输入Cookie', trigger: 'blur'
-  }, {
-    validator: (rule, value, callback) => {
-      let arr
-      try { arr = JSON.parse(value) } catch {}
-      if (!Array.isArray(arr) || arr.length === 0) return callback(new Error('Cookie格式不正确'))
-      callback()
+  text: [
+    {
+      required: true,
+      message: '请输入Cookie',
+      trigger: 'blur'
     },
-    trigger: 'blur'
-  }]
+    {
+      validator: (rule, value, callback) => {
+        let arr
+        try {
+          arr = JSON.parse(value)
+        } catch {}
+        if (!Array.isArray(arr) || arr.length === 0) return callback(new Error('Cookie格式不正确'))
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 let model = reactive({
@@ -485,6 +474,10 @@ watch(activeGroupId, (newVal) => {
   model.condition.proxyId = ''
   model.condition.keyword = ''
   model.page.current = 1
+  selectedRow.value = null
+  nextTick(() => {
+    tableRef.value?.setCurrentRow(null)
+  })
   resize()
 })
 
@@ -527,6 +520,10 @@ const search = async () => {
     if (res) {
       model.list = res.list || []
       model.page.total = res.total || 0
+      selectedRow.value = null
+      nextTick(() => {
+        tableRef.value?.setCurrentRow(null)
+      })
     }
   } catch (err) {
     console.error(err)
@@ -572,17 +569,40 @@ const buildPayload = () => {
 }
 
 const onItemClick = (row) => {
-  updateDeviceInfo(row)
+  if (selectedRow.value && selectedRow.value._id === row._id) {
+    selectedRow.value = null
+    nextTick(() => {
+      tableRef.value?.setCurrentRow(null)
+    })
+  } else {
+    selectedRow.value = row
+  }
 }
 
 const onAddClick = () => {
-  model.form = {
-    name: '',
-    groupId: activeGroupId.value,
-    sort: 0,
-    proxy: '',
-    args: '',
-    fp: defaultFp()
+  if (selectedRow.value) {
+    const fpObj = selectedRow.value.fingerprint
+      ? JSON.parse(JSON.stringify(selectedRow.value.fingerprint))
+      : defaultFp()
+    model.form = {
+      name: '',
+      groupId: selectedRow.value.groupId || activeGroupId.value,
+      sort: selectedRow.value.sort || 0,
+      proxy: selectedRow.value.proxy || '',
+      args: selectedRow.value.args || '',
+      notes: selectedRow.value.notes || '',
+      fp: fpObj
+    }
+  } else {
+    model.form = {
+      name: '',
+      groupId: activeGroupId.value,
+      sort: 0,
+      proxy: '',
+      args: '',
+      notes: '',
+      fp: defaultFp()
+    }
   }
   nextTick(() => {
     formRef.value && formRef.value.clearValidate()
@@ -689,31 +709,7 @@ const onStopClick = async (row) => {
 }
 
 const onMoreCommand = (cmd, row) => {
-  if (cmd === 'saveAsTemplate') onSaveAsTemplate(row)
-  else if (cmd === 'delete') onDeleteClick(row)
-}
-
-const onSaveAsTemplate = (row) => {
-  saveTemplateForm.profileId = row._id
-  saveTemplateForm.templateName = ''
-  saveTemplateDialog.value = true
-  nextTick(() => saveTemplateFormRef.value?.clearValidate())
-}
-
-const onSaveTemplateConfirm = async () => {
-  if (!saveTemplateFormRef.value) return
-  const valid = await validateForm(saveTemplateFormRef.value)
-  if (!valid) return
-  try {
-    await saveAsTemplate({
-      profileId: saveTemplateForm.profileId,
-      templateName: saveTemplateForm.templateName
-    })
-    ElMessage.success('已保存为模板！')
-    saveTemplateDialog.value = false
-  } catch (err) {
-    if (!err?.silent) ElMessage.error('保存失败：' + (err?.message || err))
-  }
+  if (cmd === 'delete') onDeleteClick(row)
 }
 
 const onCookieImport = (row) => {
@@ -724,7 +720,7 @@ const onCookieImport = (row) => {
 }
 
 const onCookieImportConfirm = async () => {
-  if (!await validateForm(cookieFormRef.value)) return
+  if (!(await validateForm(cookieFormRef.value))) return
   const cookies = JSON.parse(cookieForm.text)
   try {
     await importCookies({ id: cookieImportRow.value._id, cookies })

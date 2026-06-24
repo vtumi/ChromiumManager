@@ -51,13 +51,6 @@
         <el-button
           type="primary"
           size="default"
-          :icon="Files"
-          class="template"
-          @click="onTemplateClick"
-        ></el-button>
-        <el-button
-          type="primary"
-          size="default"
           :icon="Plus"
           class="add"
           @click="onAddClick"
@@ -66,23 +59,20 @@
     </div>
     <Content ref="contentRef" />
     <ProxyManagement v-model="proxyDialog" @change="fetchProxies" @select="onProxySelect" />
-    <TemplateManagement v-model="templateDialog" @change="onTemplateChange" />
   </div>
 </template>
 
 <script setup>
 import { inject, provide, reactive, ref, computed, watch, onMounted } from 'vue'
-import { Search, Refresh, Plus, ArrowDown, CircleClose, Files } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, ArrowDown, CircleClose } from '@element-plus/icons-vue'
 import { getProxies } from '@/api'
 
 import Content from './RightContent.vue'
 import ProxyManagement from './ProxyManagement.vue'
-import TemplateManagement from './TemplateManagement.vue'
 
 const activeGroupId = inject('activeGroupId')
 let contentRef = ref(null)
 let proxyDialog = ref(false)
-let templateDialog = ref(false)
 let proxies = ref([])
 let model = reactive({
   condition: { proxyId: '', keyword: '' }
@@ -132,12 +122,6 @@ const onSearchClick = () => {
   contentRef.value.onSearchClick(model.condition.proxyId, model.condition.keyword)
 }
 const onRefreshClick = () => {
-  contentRef.value.onRefreshClick()
-}
-const onTemplateClick = () => {
-  templateDialog.value = true
-}
-const onTemplateChange = () => {
   contentRef.value.onRefreshClick()
 }
 const onAddClick = () => {

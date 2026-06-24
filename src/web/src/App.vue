@@ -25,17 +25,12 @@ provide('activeGroupId', activeGroupId)
 provide('updateActiveGroupId', updateActiveGroupId)
 
 let device = reactive({
-  info: {},
   group: []
 })
-const updateDeviceInfo = (value) => {
-  device.info = value
-}
 const updateDeviceGroup = (value) => {
   device.group = value
 }
 provide('device', device)
-provide('updateDeviceInfo', updateDeviceInfo)
 provide('updateDeviceGroup', updateDeviceGroup)
 
 const getGroupName = (value) => {

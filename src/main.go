@@ -195,15 +195,6 @@ func main() {
 	mux.HandleFunc("GET /export_cookies", exportCookies)
 	mux.HandleFunc("POST /import_cookies", importCookies)
 
-	// Template routes
-	mux.HandleFunc("GET /get_templates", getTemplates)
-	mux.HandleFunc("GET /get_template", getTemplate)
-	mux.HandleFunc("POST /add_template", addTemplate)
-	mux.HandleFunc("POST /update_template", updateTemplate)
-	mux.HandleFunc("POST /delete_template", deleteTemplate)
-	mux.HandleFunc("POST /create_from_template", createFromTemplate)
-	mux.HandleFunc("POST /save_as_template", saveAsTemplate)
-
 	// Proxy routes
 	mux.HandleFunc("GET /get_proxies", getProxies)
 	mux.HandleFunc("GET /get_proxy", getProxy)
