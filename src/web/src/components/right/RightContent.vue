@@ -44,7 +44,7 @@
         <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
             <template v-if="runningSet.has(scope.row._id)">
-              <el-button type="primary" size="small" @click.stop="onShowClick(scope.row)">
+              <el-button type="success" size="small" @click.stop="onShowClick(scope.row)">
                 激活
               </el-button>
               <el-button type="danger" size="small" @click.stop="onStopClick(scope.row)">
@@ -57,14 +57,9 @@
                 启动
               </el-button>
               <el-button size="small" @click.stop="onEditClick(scope.row)">编辑</el-button>
-              <el-dropdown trigger="click" @command="(cmd) => onMoreCommand(cmd, scope.row)">
-                <el-button size="small" @click.stop>更多</el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="delete" class="delete-item">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+              <el-button size="small" class="delete" @click.stop="onDeleteClick(scope.row)">
+                删除
+              </el-button>
             </template>
           </template>
         </el-table-column>
@@ -706,10 +701,6 @@ const onStopClick = async (row) => {
   } catch (err) {
     if (!err?.silent) ElMessage.error('关闭失败: ' + (err?.message || err))
   }
-}
-
-const onMoreCommand = (cmd, row) => {
-  if (cmd === 'delete') onDeleteClick(row)
 }
 
 const onCookieImport = (row) => {
