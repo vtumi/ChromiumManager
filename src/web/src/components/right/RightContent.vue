@@ -245,7 +245,6 @@
                 v-model="model.form.fp.location"
                 :disabled="model.form.fp.proxyLocation"
                 placeholder="请输入或选择位置"
-                clearable
               >
                 <template #suffix>
                   <el-icon class="location-pick-icon" @click.stop="onPickFpLocation">

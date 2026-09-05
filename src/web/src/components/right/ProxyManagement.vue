@@ -139,7 +139,6 @@
               <el-input
                 v-model="form.location"
                 placeholder="请输入或选择位置"
-                clearable
               >
                 <template #suffix>
                   <el-icon class="location-pick-icon" @click.stop="onPickLocation">
