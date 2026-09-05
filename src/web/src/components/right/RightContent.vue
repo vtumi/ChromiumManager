@@ -240,16 +240,19 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="位置" class="input-picker">
+            <el-form-item label="位置">
               <el-input
                 v-model="model.form.fp.location"
                 :disabled="model.form.fp.proxyLocation"
-                placeholder="请选择位置"
+                placeholder="请输入或选择位置"
                 clearable
-                class="input-picker"
-                @click="onPickFpLocation"
-                @keydown.prevent
-              ></el-input>
+              >
+                <template #suffix>
+                  <el-icon class="location-pick-icon" @click.stop="onPickFpLocation">
+                    <Location />
+                  </el-icon>
+                </template>
+              </el-input>
             </el-form-item>
           </el-col>
         </el-row>

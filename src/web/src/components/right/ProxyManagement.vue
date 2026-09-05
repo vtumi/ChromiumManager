@@ -138,12 +138,15 @@
             <el-form-item label="位置" prop="location">
               <el-input
                 v-model="form.location"
-                placeholder="请选择位置"
+                placeholder="请输入或选择位置"
                 clearable
-                class="input-picker"
-                @click="onPickLocation"
-                @keydown.prevent
-              ></el-input>
+              >
+                <template #suffix>
+                  <el-icon class="location-pick-icon" @click.stop="onPickLocation">
+                    <Location />
+                  </el-icon>
+                </template>
+              </el-input>
             </el-form-item>
           </el-col>
         </el-row>

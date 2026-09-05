@@ -116,3 +116,11 @@ body {
   padding-left: 8px;
   cursor: pointer;
 }
+
+.location-pick-icon {
+  cursor: pointer;
+  color: #409eff;
+  &:hover {
+    color: #66b1ff;
+  }
+}
